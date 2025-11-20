@@ -10,6 +10,7 @@ body {
   background: #f5f7fa;
   color: #333;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* Container flexível */
@@ -32,7 +33,6 @@ header {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  text-align: center;
 }
 
 h1 {
@@ -44,7 +44,6 @@ nav ul {
   display: flex;
   list-style: none;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -72,6 +71,7 @@ section {
   box-shadow: 0 5px 15px rgba(0,0,0,0.05);
   padding: 2rem;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 h2 {
@@ -87,6 +87,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
+  width: 100%;
 }
 
 .chart-card {
@@ -94,6 +95,7 @@ h2 {
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  width: 100%;
 }
 
 .chart-title {
@@ -121,7 +123,7 @@ h2 {
   font-weight: 600;
 }
 
-/* Estilos para tabelas cruzadas - Centralizadas e sem bordas laterais extremas */
+/* Tabelas cruzadas - CORRIGIDO */
 .table-card {
   background: white;
   border-radius: 12px;
@@ -132,6 +134,7 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 .table-title {
@@ -147,9 +150,9 @@ h2 {
 
 .table-container {
   width: 100%;
+  overflow-x: auto;
   display: flex;
   justify-content: center;
-  overflow-x: auto;
 }
 
 .cross-table {
@@ -157,52 +160,20 @@ h2 {
   margin: 1rem 0;
   font-size: 0.9rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  /* Remove apenas as bordas laterais extremas */
-  border-left: none;
-  border-right: none;
+  /* REMOVIDO min-width - isso causava rolagem horizontal */
 }
 
-.table-header-primary {
+.table-header-primary, .table-header-secondary {
   background: #FFD700;
   color: #000;
   font-weight: bold;
 }
 
-.table-header-secondary {
-  background: #FFD700;
-  color: #000;
-  font-weight: bold;
-}
-
-.primary-header {
-  padding: 12px 15px;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid #ccc;
-  /* Remove apenas a borda esquerda da primeira célula */
-  border-left: none;
-}
-
-.secondary-header {
-  padding: 12px 15px;
-  text-align: center;
-  font-weight: 600;
-  border: 1px solid #ccc;
-  /* Remove apenas a borda direita do cabeçalho secundário */
-  border-right: none;
-}
-
-.column-header {
+.primary-header, .secondary-header, .column-header {
   padding: 10px 12px;
   text-align: center;
   font-weight: 600;
   border: 1px solid #ccc;
-  background: #FFD700;
-  /* Mantém bordas internas, remove apenas a da última coluna */
-}
-
-.column-header:last-child {
-  border-right: none;
 }
 
 .row-header {
@@ -211,53 +182,16 @@ h2 {
   font-weight: 600;
   border: 1px solid #ccc;
   background: #f8f9fa;
-  /* Remove apenas a borda esquerda da primeira coluna */
-  border-left: none;
 }
 
 .data-cell {
   padding: 10px 12px;
   text-align: center;
   border: 1px solid #ccc;
-  transition: all 0.2s ease;
-  /* Mantém bordas internas, remove apenas a da última coluna */
-}
-
-.data-cell:last-child {
-  border-right: none;
-}
-
-.cross-table tbody tr:hover {
-  background: #f0f7ff;
-}
-
-.data-cell.has-data {
-  font-weight: 500;
 }
 
 .data-cell.has-data:hover {
   background: #e3f2fd;
-  transform: scale(1.02);
-}
-.data-cell.has-data:hover {
-  background: #e3f2fd;
-  transform: scale(1.02);
-}
-
-/* Remove apenas as bordas laterais das extremidades da tabela */
-.cross-table {
-  border-left: none;
-  border-right: none;
-}
-
-.cross-table th:first-child,
-.cross-table td:first-child {
-  border-left: none;
-}
-
-.cross-table th:last-child,
-.cross-table td:last-child {
-  border-right: none;
 }
 
 /* Footer */
@@ -267,46 +201,22 @@ footer {
   text-align: center;
   padding: 1.5rem 0;
   margin-top: 2rem;
+  width: 100%;
 }
 
-/* Para ajustar o formulario */
+/* Formulário */
 .form-container {
   width: 100%;
-  overflow: hidden;
-  position: relative;
-  padding-bottom: 140%; /* Proporção aproximada do Google Forms */
-  height: 0;
+  height: 150vh;
 }
 
 .form-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   border: none;
 }
 
-/* Ajustes para tablets */
-@media (min-width: 768px) {
-  .form-container {
-    padding-bottom: 120%;
-  }
-}
-
-/* Ajustes para desktops */
-@media (min-width: 1024px) {
-  .form-container {
-    padding-bottom: 1000px;
-    height: 1000px;
-  }
-}
-
-iframe {
-  max-width: 100%;
-}
-
-/* Loading e estados de erro */
+/* Loading e erro */
 .loading {
   text-align: center;
   padding: 2rem;
@@ -326,20 +236,19 @@ iframe {
   font-weight: 500;
 }
 
-/* Responsividade extra */
+/* RESPONSIVIDADE - MOBILE FIRST */
 @media (max-width: 768px) {
-  nav ul {
-    flex-direction: column;
-    gap: 0.5rem;
+  .form-container {
+    height: 200vh;
   }
   
-  section {
-    padding: 1rem;
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .table-card {
     padding: 1rem;
-    margin-bottom: 1.5rem;
   }
   
   .table-title {
@@ -348,7 +257,7 @@ iframe {
   }
   
   .cross-table {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
   
   .primary-header,
@@ -356,22 +265,42 @@ iframe {
   .column-header,
   .row-header,
   .data-cell {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
   
-  .chart-explanation {
+  section {
     padding: 1rem;
-    font-size: 0.9rem;
+  }
+  
+  nav ul {
+    flex-direction: column;
   }
 }
 
 @media (max-width: 480px) {
-  table td, table th {
-    font-size: 0.8rem;
-    padding: 6px;
+  .cross-table {
+    font-size: 0.7rem;
   }
   
-  .charts-grid {
-    grid-template-columns: 1fr;
+  .primary-header,
+  .secondary-header,
+  .column-header,
+  .row-header,
+  .data-cell {
+    padding: 4px 6px;
   }
+  
+  .form-container {
+    height: 180vh;
+  }
+}
+
+/* GARANTIA FINAL - ZERO rolagem horizontal */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  max-width: 100%;
 }
