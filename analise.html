@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Financeira - Cimento & Cifras</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header><div class="container"><div class="header-content"><h1>Cimento & Cifras</h1><nav><ul><li><a href="index.html">Página Inicial</a></li><li><a href="analise.html">Análise Financeira</a></li></ul></nav></div></div></header>
+    <main class="container"><section><h2>Análise Completa das Respostas</h2><div class="loading" id="loading">Carregando dados...</div><div id="charts-container" class="charts-grid"></div><div id="error" class="error"></div></section></main>
+    <footer><div class="container"><p>&copy; 2025 Projeto de Extensão Universitária Cimento & Cifras</p></div></footer>
+
+    <script>
+        //Link de importação do CSV
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1VAWN9Q8OmK3aHwg_GGZAqxNtW_RxqLikDR6HV2uj9x0/export?format=csv"
+      
+        const CORES = ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#C9CBCF']
+      
+        //Perguntas utilizadas no forms
+        const PERGUNTAS = [
+          'Qual é o seu grau de escolaridade?',
+          'Quantos dias no mês você geralmente trabalha?',
+          'Qual a sua renda média mensal?',
+          'Qual sua área de atuação na construção civil?',
+          'Você tem meio de transporte próprio?',
+          'Qual o seu gasto médio com despesas fixas do trabalho (materiais, transporte, etc.)?',
+          'Há quanto tempo você trabalha na área?',
+          'Quantos integrantes tem sua família?',
+          'Você tem algum conhecimento de investimento?',
+          'Quanto você investe mensalmente?',
+          'Qual tipo de investimento você faz?'
+        ]
+      
+        //cabeçalhos do CSV
+        const MAPA_CABECALHO = {
+          'Qual é o seu grau de escolaridade?': 'Qual é o seu grau de escolaridade?',
+          'Quantos dias no mês você geralmente trabalha?': 'Quantos dias no mês você geralmente trabalha?',
+          'Qual a sua renda média mensal?': 'Qual a sua renda média mensal?',
+          'Qual sua área de atuação na construção civil?': 'Qual sua área de atuação na construção civil?',
+          'Você tem meio de transporte próprio?': 'Você tem meio de transporte próprio?',
+          'Qual o seu gasto médio com despesas fixas do trabalho (materiais, transporte, etc.)?': 'Qual o seu gasto médio com despesas fixas do trabalho (materiais, transporte, etc.)?',
+          'Há quanto tempo você trabalha na área?': 'Há quanto tempo você trabalha na área?',
+          'Quantos integrantes tem sua família?': 'Quantos integrantes tem sua família?',
+          'Você tem algum conhecimento de investimento?': 'Você tem algum conhecimento de investimento?',
+          'Quanto você investe mensalmente?': 'Quanto você investe mensalmente?',
+          'Qual tipo de investimento você faz?': 'Qual tipo de investimento você faz?'
+        }
+
+        // Análises para cada gráfico e tabela
+        const ANALISES = {
+            // Gráficos individuais
+            'Qual é o seu grau de escolaridade?': 'Análise do perfil educacional dos profissionais. A maioria possui ensino fundamental completo, refletindo a característica do setor onde a experiência prática é altamente valorizada.',
+            
+            'Quantos dias no mês você geralmente trabalha?': 'Análise da frequência de trabalho mensal. A média de dias trabalhados revela padrões de sazonalidade e disponibilidade de serviços na construção civil.',
+            
+            'Qual a sua renda média mensal?': 'Análise da distribuição de renda entre os profissionais. As faixas salariais predominantes indicam o potencial de ganho no setor.',
+            
+            'Qual sua área de atuação na construção civil?': 'Análise das especialidades predominantes. Algumas áreas tendem a oferecer maior estabilidade e remuneração que outras.',
+            
+            'Você tem meio de transporte próprio?': 'Análise da mobilidade dos profissionais. Posse de transporte próprio impacta diretamente na capacidade de aceitar trabalhos em diferentes localizações.',
+            
+            'Qual o seu gasto médio com despesas fixas do trabalho (materiais, transporte, etc.)?': 'Análise dos custos operacionais. Estes gastos influenciam diretamente no lucro líquido do profissional.',
+            
+            'Há quanto tempo você trabalha na área?': 'Análise da experiência profissional. Tempo de atuação correlaciona-se com estabilidade financeira e rede de contatos.',
+            
+            'Quantos integrantes tem sua família?': 'Análise do contexto familiar. O número de dependentes impacta nas despesas mensais e na capacidade de poupança.',
+            
+            'Você tem algum conhecimento de investimento?': 'Análise da educação financeira. Conhecimento sobre investimentos é crucial para o planejamento de longo prazo.',
+            
+            'Quanto você investe mensalmente?': 'Análise do hábito de investir. O valor destinado a investimentos reflete a disciplina financeira do profissional.',
+            
+            'Qual tipo de investimento você faz?': 'Análise do perfil de investidor. Diferentes tipos de investimento oferecem variados níveis de risco e retorno.',
+            
+            // Tabelas cruzadas
+            'ESCOLARIDADE_AREA': 'Relação entre escolaridade e área de atuação. Profissionais com maior formação tendem para áreas mais especializadas como elétrica e hidráulica, enquanto menor escolaridade concentra-se em serviços gerais e alvenaria.',
+            
+            'RENDA_TRANSPORTE': 'Relação entre renda e posse de transporte. Profissionais com veículo próprio apresentam renda média superior, evidenciando a importância da mobilidade para ampliar oportunidades de trabalho.',
+            
+            'ESCOLARIDADE_INVESTIMENTO': 'Relação entre escolaridade e tipos de investimento. Maior escolaridade correlaciona-se com maior diversificação de investimentos, incluindo aplicações além da poupança tradicional.',
+            
+            'RENDA_INVESTIMENTO_MENSAL': 'Relação entre renda e valor investido. Observa-se que mesmo profissionais de menor renda destinam parte de seus recursos para investimentos, demonstrando preocupação com o futuro.',
+            
+            'TIPO_INVESTIMENTO_VALOR': 'Relação entre tipo de investimento e valor aplicado. A poupança continua sendo o investimento mais popular em todas as faixas de valor, indicando conservadorismo do setor.'
+        }
+      
+        //Função para criar os gráficos
+        function criarGrafico(container, titulo, labels, dados, tipo = 'pie', explicacao = 'Análise detalhada será desenvolvida com base nos dados coletados.') {
+            const canvas = document.createElement('canvas')
+            const card = document.createElement('div')
+            card.className = 'chart-card'
+            card.innerHTML = `<div class="chart-title">${titulo}</div>`
+            card.appendChild(canvas)
+
+            // Área para análise
+            const analise = document.createElement('div')
+            analise.className = 'chart-explanation'
+            analise.innerHTML = `<strong>Análise:</strong> ${explicacao}`
+            card.appendChild(analise)
+
+            container.appendChild(card)
+
+            new Chart(canvas, {
+                type: tipo,
+                data: { labels, datasets: [{ data: dados, backgroundColor: CORES, borderWidth: 1 }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            })
+        }
+      
+        //Parser de CSV que respeita as aspas e as vírgulas
+        function parseCSV(text) {
+            const rows = []
+            let row = []
+            let cell = ''
+            let inQuotes = false
+      
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i]
+                const next = text[i + 1]
+      
+                if (char === '"') {
+                    if (inQuotes && next === '"') {
+                        cell += '"'
+                        i++
+                    } else {
+                        inQuotes = !inQuotes
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(cell)
+                    cell = ''
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (cell !== '' || row.length > 0) {
+                        row.push(cell)
+                        rows.push(row)
+                        row = []
+                        cell = ''
+                    }
+                    if (char === '\r' && next === '\n') i++
+                } else {
+                    cell += char
+                }
+            }
+            if (cell !== '' || row.length > 0) {
+                row.push(cell)
+                rows.push(row)
+            }
+            return rows
+        }
+      
+        //Formata os cabeçalhos e valores
+        function formatar(str) {
+            return (str || '')
+                .replace(/\r/g, '')
+                .replace(/\n/g, '')
+                .replace(/^"+|"+$/g, '')
+                .trim()
+        }
+      
+        async function carregarDados() {
+            const response = await fetch(SHEET_URL)
+            if (!response.ok) throw new Error(`Erro: ${response.status}`)
+      
+            const csvText = await response.text()
+            if (!csvText.trim()) throw new Error('Planilha vazia')
+      
+            const rows = parseCSV(csvText)
+            const headerRaw = rows[0] || []
+            const headers = headerRaw.map(formatar)
+      
+            const dados = rows.slice(1).map(r => {
+                const registro = {}
+                headers.forEach((h, i) => {
+                    registro[h] = formatar(r[i])
+                })
+                return registro
+            })
+      
+            return { headers, dados }
+        }
+      
+        function processarPergunta(dados, pergunta, container, tipoGrafico = 'pie', explicacao = 'Análise detalhada será desenvolvida com base nos dados coletados.') {
+            const respostas = {}
+            const cabecalhoCSV = MAPA_CABECALHO[pergunta]
+      
+            if (!cabecalhoCSV) {
+                respostas['Cabeçalho não mapeado'] = 1
+            } else {
+                dados.forEach(registro => {
+                    const valor = registro[cabecalhoCSV]
+                    const chave = valor && valor.length ? valor : 'Não informado'
+                    respostas[chave] = (respostas[chave] || 0) + 1
+                })
+            }
+            criarGrafico(container, pergunta, Object.keys(respostas), Object.values(respostas), tipoGrafico, explicacao)
+        }
+      
+        //Função para criar as tabelas cruzadas
+        function criarTabelaCruzada(dados, pergunta1, pergunta2, container, explicacao = 'Análise detalhada será desenvolvida com base nos dados coletados.') {
+            const respostas = {}
+
+            dados.forEach(registro => {
+                const valor1 = registro[pergunta1] || 'Não informado'
+                const valor2 = registro[pergunta2] || 'Não informado'
+                if (!respostas[valor1]) respostas[valor1] = {}
+                respostas[valor1][valor2] = (respostas[valor1][valor2] || 0) + 1
+            })
+
+            const colunas = [...new Set(dados.map(r => r[pergunta2] || 'Não informado'))]
+            
+            // Cria um card para a tabela
+            const card = document.createElement('div')
+            card.className = 'table-card'
+            
+            // Título da tabela cruzada
+            const titulo = document.createElement('div')
+            titulo.className = 'table-title'
+            titulo.textContent = `${pergunta1} × ${pergunta2}`
+            card.appendChild(titulo)
+
+            const tabelaContainer = document.createElement('div')
+            tabelaContainer.className = 'table-container'
+            
+            const tabela = document.createElement('table')
+            tabela.className = 'cross-table'
+            
+            //Cabeçalho da tabela cruzada
+            let thead = `
+                <thead>
+                    <tr class="table-header-primary">
+                        <th rowspan="2" class="primary-header">${pergunta1}</th>
+                        <th colspan="${colunas.length}" class="secondary-header">
+                            ${pergunta2}
+                        </th>
+                    </tr>
+                    <tr class="table-header-secondary">`
+            colunas.forEach(c => {
+                thead += `<th class="column-header">${c}</th>`
+            })
+            thead += '</tr></thead>'
+            tabela.innerHTML = thead
+
+            // Corpo da tabela
+            const tbody = document.createElement('tbody')
+            Object.keys(respostas).forEach(valor1 => {
+                let linha = `<tr><td class="row-header">${valor1}</td>`
+                colunas.forEach(valor2 => {
+                    const count = respostas[valor1][valor2] || 0
+                    const cellClass = count > 0 ? 'data-cell has-data' : 'data-cell'
+                    linha += `<td class="${cellClass}">${count}</td>`
+                })
+                linha += '</tr>'
+                tbody.innerHTML += linha
+            })
+            tabela.appendChild(tbody)
+            
+            tabelaContainer.appendChild(tabela)
+            card.appendChild(tabelaContainer)
+
+            // Área para análise - mantendo a formatação harmoniosa
+            const analise = document.createElement('div')
+            analise.className = 'chart-explanation'
+            analise.innerHTML = `<strong>Análise:</strong> ${explicacao}`
+            card.appendChild(analise)
+
+            container.appendChild(card)
+        }
+      
+        //Inicialização
+        async function inicializar() {
+            try {
+                document.getElementById('loading').style.display = 'block'
+                const { headers, dados } = await carregarDados()
+                document.getElementById('loading').style.display = 'none'
+      
+                console.log('Cabeçalhos CSV:', headers)
+      
+                const container = document.getElementById('charts-container')
+                PERGUNTAS.forEach((pergunta, index) => {
+                    const tipo = index % 3 === 0 ? 'pie' : index % 3 === 1 ? 'bar' : 'doughnut'
+                    const explicacao = ANALISES[pergunta] || 'Análise detalhada será desenvolvida com base nos dados coletados.'
+                    processarPergunta(dados, pergunta, container, tipo, explicacao)
+                })
+
+                criarTabelaCruzada(dados,
+                    "Qual é o seu grau de escolaridade?",
+                    "Qual sua área de atuação na construção civil?",
+                    document.getElementById('charts-container'),
+                    ANALISES['ESCOLARIDADE_AREA'])
+
+                criarTabelaCruzada(dados,
+                    "Qual a sua renda média mensal?",
+                    "Você tem meio de transporte próprio?",
+                    document.getElementById('charts-container'),
+                    ANALISES['RENDA_TRANSPORTE'])
+
+                criarTabelaCruzada(dados,
+                    "Qual é o seu grau de escolaridade?",
+                    "Qual tipo de investimento você faz?",
+                    document.getElementById('charts-container'),
+                    ANALISES['ESCOLARIDADE_INVESTIMENTO'])
+
+                criarTabelaCruzada(dados,
+                    "Qual a sua renda média mensal?",
+                    "Quanto você investe mensalmente?",
+                    document.getElementById('charts-container'),
+                    ANALISES['RENDA_INVESTIMENTO_MENSAL'])
+
+                criarTabelaCruzada(dados,
+                    "Qual tipo de investimento você faz?",
+                    "Quanto você investe mensalmente?",
+                    document.getElementById('charts-container'),
+                    ANALISES['TIPO_INVESTIMENTO_VALOR'])
+        
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none'
+                const el = document.getElementById('error')
+                el.style.display = 'block'
+                el.textContent = `Erro: ${error.message}`
+            }
+        }
+      
+        document.addEventListener('DOMContentLoaded', inicializar)
+    </script>
+</body>
+</html> 
